@@ -3,10 +3,16 @@ import java.awt.Color;
 
 public class SeamCarver {
 
-    private int[] pixels;
+    private int[] pixels; // Stores the RGB values of each pixel in the image
     private int width;
     private int height;
 
+    /**
+     * Creates a seam carver object and fills the pixels array based on the given picture.
+     *
+     * @param picture The image to be used for seam carving.
+     * @throws IllegalArgumentException if the picture is null.
+     */
     public SeamCarver(Picture picture) {
         if (picture == null) throw new IllegalArgumentException();
         this.width = picture.width();
@@ -16,9 +22,13 @@ public class SeamCarver {
         for (int i = 0; i < width*height; i++) {
             pixels[i] = picture.getRGB(i % width, i / width);
         }
-
     }
 
+    /**
+     * Creates a new Picture object that is a copy of the current image.
+     *
+     * @return A new Picture object that is a copy of the current image.
+     */
     public Picture picture() {
         Picture picture = new Picture(width(), height());
         for (int i = 0; i < width*height; i++) {
@@ -27,21 +37,40 @@ public class SeamCarver {
         return picture;
     }
 
+    /**
+     * Returns the width of the image.
+     *
+     * @return The width of the image.
+     */
     public int width() { return width; }
 
+    /**
+     * Returns the height of the image.
+     *
+     * @return The height of the image.
+     */
     public int height() { return height; }
 
 
-    // straightforward energy computing of a pixel
+    /**
+     * Calculates the energy of a pixel at a given location.
+     *
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     * @throws IllegalArgumentException if the pixel coordinates are outside the image bounds.
+     * @return The energy of the pixel.
+     */
     public double energy(int x, int y) {
 
-        if (x < 0 || x > width() - 1) throw new IllegalArgumentException();
-        if (y < 0 || y > height() - 1) throw new IllegalArgumentException();
+        if (x < 0 || x > width() - 1) throw new IllegalArgumentException("x coordinate out of bounds");
+        if (y < 0 || y > height() - 1) throw new IllegalArgumentException("y coordinate out of bounds");
 
+        // If the pixel is on the border, its energy is high
         if (x == 0 || y == 0 || y == height() - 1 || x == width() - 1) {
             return 1000.0;
         }
 
+        // Calculate the squared color differences between the pixel and its neighbors
         double deltaX, deltaY;
 
         int rgbRight = pixels[y * width + x + 1];
@@ -77,9 +106,15 @@ public class SeamCarver {
         by = blueUp - blueDown;
         deltaY = Math.pow(ry, 2) + Math.pow(gy, 2) + Math.pow(by, 2);
 
+        // Return the square root of the sum of squared differences
         return Math.sqrt(deltaX + deltaY);
     }
 
+    /**
+     * Computes a horizontal seam based on the energy values of pixels.
+     *
+     * @return Array of x-coordinates of pixels in the horizontal seam.
+     */
     public int[] findHorizontalSeam() {
 
         double[] energies = new double[width()*height() + 2];
@@ -102,6 +137,11 @@ public class SeamCarver {
         return seam;
     }
 
+    /**
+     * Computes a vertical seam based on the energy values of pixels.
+     *
+     * @return Array of y-coordinates of pixels in the vertical seam.
+     */
     public int[] findVerticalSeam() {
 
         double[] energies = new double[width()*height() + 2];
@@ -122,6 +162,11 @@ public class SeamCarver {
         return seam;
     }
 
+    /**
+     *  Removes a vertical seam from picture, shrinks the image horizontally.
+     *
+     * @param seam Array of y-coordinates of pixels in the vertical seam.
+     */
     public void removeVerticalSeam(int[] seam) {
         if (seam == null) throw new IllegalArgumentException();
         if (seam.length != height()) throw new IllegalArgumentException();
@@ -150,6 +195,11 @@ public class SeamCarver {
         width--;
     }
 
+    /**
+     *  Removes a horizontal seam from picture, shrinks the image vertically.
+     *
+     * @param seam Array of x-coordinates of pixels in the horizontal seam.
+     */
     public void removeHorizontalSeam(int[] seam) {
         if(seam == null) throw new IllegalArgumentException();
         if(seam.length != width()) throw new IllegalArgumentException();
@@ -178,13 +228,18 @@ public class SeamCarver {
         height--;
     }
 
+
+    // Unit testing
     public static void main(String[] args) {
-        Picture picture = new Picture("surf.jpg");
+        Picture picture = new Picture("bomen.jpg");
 
         SeamCarver seamCarver = new SeamCarver(picture);
 
         for(int i = 0 ; i < 100; i++) {
             seamCarver.removeHorizontalSeam(seamCarver.findHorizontalSeam());
+        }
+
+        for(int i = 0 ; i < 150; i++) {
             seamCarver.removeVerticalSeam(seamCarver.findVerticalSeam());
         }
 

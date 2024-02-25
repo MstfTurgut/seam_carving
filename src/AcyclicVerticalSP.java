@@ -4,10 +4,18 @@ import java.util.Arrays;
 
 public class AcyclicVerticalSP {
 
-    private final double[] distTo;
-    private final int[] edgeTo;
-    private final double[] weight;
+    private final double[] distTo;  // distTo[v] = distance  of shortest s->v path
+    private final int[] edgeTo;  // edgeTo[v] = last edge on shortest s->v path
+    private final double[] weight;  // weight[v] = weight of a vertex v
 
+    /**
+     *
+     * Computes shortest paths tree from last vertex to every other vertex in
+     * the directed acyclic graph abstraction.
+     *
+     * @param weight Acyclic digraph abstraction.
+     * @param width Width of the image for getting coordinates.
+     */
     public AcyclicVerticalSP(double[] weight, int width) {
         distTo = new double[weight.length];
         edgeTo = new int[weight.length];
@@ -20,7 +28,7 @@ public class AcyclicVerticalSP {
         distTo[weight.length - 2] = 0.0;
 
         // visit vertices in topological order
-        SeamTopologicalVertical top = new SeamTopologicalVertical(weight.length, width);
+        VerticalTopologicalSort top = new VerticalTopologicalSort(weight.length, width);
 
         int height = ((weight.length - 2)/ width);
 
@@ -42,6 +50,7 @@ public class AcyclicVerticalSP {
         }
     }
 
+    // relax an edge , v to w
     private void relax(int v, int w) {
         if (distTo[w] >= distTo[v] + weight[w]) {
             distTo[w] = distTo[v] + weight[w];
@@ -49,12 +58,23 @@ public class AcyclicVerticalSP {
         }
     }
 
+    /**
+     * Is there a path from the source vertex to vertex {@code v}?
+     *
+     * @param v Vertex to check.
+     * @return {@code true} if there is a path from the source vertex
+     */
     public boolean hasPathTo(int v) {
         validateVertex(v);
         return distTo[v] < Double.POSITIVE_INFINITY;
     }
 
-
+    /**
+     *
+     * @param v Target vertex.
+     * @return The shortest path from source vertex to vertex {@code v}
+     * as an iterable, and {@code null} if no such path
+     */
     public Iterable<Integer> pathTo(int v) {
         validateVertex(v);
         if (!hasPathTo(v)) {
@@ -67,9 +87,9 @@ public class AcyclicVerticalSP {
         return path;
     }
 
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
+    // throw an IllegalArgumentException unless {@code 0 <= v < weight.length}
     private void validateVertex(int v) {
-        int l = distTo.length;
+        int l = weight.length;
         if (v < 0 || v >= l)
             throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (l-1));
     }
