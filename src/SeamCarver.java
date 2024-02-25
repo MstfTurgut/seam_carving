@@ -229,21 +229,30 @@ public class SeamCarver {
     }
 
 
-    // Unit testing
-    public static void main(String[] args) {
-        Picture picture = new Picture("bomen.jpg");
+    private static void resizeAndShow(Picture picture, int horizontal, int vertical) {
 
         SeamCarver seamCarver = new SeamCarver(picture);
 
-        for(int i = 0 ; i < 100; i++) {
+        for(int i = 0 ; i < vertical; i++) {
             seamCarver.removeHorizontalSeam(seamCarver.findHorizontalSeam());
         }
 
-        for(int i = 0 ; i < 150; i++) {
+        for(int i = 0 ; i < horizontal; i++) {
             seamCarver.removeVerticalSeam(seamCarver.findVerticalSeam());
         }
 
         seamCarver.picture().show();
     }
+
+    // Unit testing
+    public static void main(String[] args) {
+
+        int horizontalResize = 150;
+        int verticalResize = 100;
+
+        resizeAndShow(new Picture("bomen.jpg"), horizontalResize, verticalResize);
+
+    }
+
 }
 
